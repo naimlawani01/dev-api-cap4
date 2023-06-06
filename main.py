@@ -1,5 +1,6 @@
+from contextlib import nullcontext
 from typing import Optional
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, Body, HTTPException, Response, status
 from pydantic import BaseModel
 app = FastAPI() # Variable name for the server
 
@@ -76,6 +77,31 @@ async def root():
 @app.get("/cameras")
 async def getCameras():
     return cameras
+#Get by Id
+@app.get("/cameras/{camera_id}")
+async def getCameraById(camera_id: int, response: Response):
+    corresponding_camera = {}
+    for item in cameras:
+        if item["id"] == camera_id:
+            index = cameras.index(item)
+            print(index)
+            corresponding_camera =  item
+            return corresponding_camera
+            break
+    if corresponding_camera == {}:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return {"message": "Camera not found"}
+    
+    # try:
+    #     corresponding_camera = cameras[index]
+    # except:
+    #     raise HTTPException(
+    #         status.HTTP_404_NOT_FOUND,
+    #         detail= "Camera not found"
+    #     )
+
+
+    return corresponding_camera
 
 @app.post("/cameras", status_code=201)
 async def createCameras(payload: Camera):
