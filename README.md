@@ -25,3 +25,7 @@ uvicorn main:app
 
 ## Fonctionnalité 
 
+-  L'utilisateur disposent de rôles suivant visiteur, modérateur, admin
+-  Un utilisateur admin peut modifier le rôle d'un autre utilisateur (Custumer)
+-  Un admin peut effectuer certaines opération spécifique telsque:
+  - Supprimer une camera, supprimer un review, update une camera 
