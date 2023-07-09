@@ -28,6 +28,7 @@ class Customer_POST_Body (BaseModel):
 class Customer_response (BaseModel):
     id: int
     email:str
+    role: str
     create_at: datetime
     class Config: # Importante pour la traduction ORM->DTO
         orm_mode= True

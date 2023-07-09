@@ -133,5 +133,5 @@ async def update_camera(
     else: 
         raise HTTPException (
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'Ne corresponding product with id: {camera_id}'
+            detail=f'No corresponding product with id: {camera_id}'
         )
