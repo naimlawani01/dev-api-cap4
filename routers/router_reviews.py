@@ -6,6 +6,7 @@ from schemas import schemas_dto
 from models.Review import Review
 from models.Customer import Customer
 import utilities
+from typing import List
 
 from pydantic.typing import Annotated
 from fastapi.security import OAuth2PasswordBearer
@@ -18,7 +19,7 @@ router = APIRouter(
 )
 
 #Get all review
-@router.get('', response_model=list[schemas_dto.Review])
+@router.get('', response_model=List[schemas_dto.Review])
 async def get_all_reviews(
     cursor: Session = Depends(get_cursor)
     ):
