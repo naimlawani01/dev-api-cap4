@@ -94,7 +94,7 @@ async def update_customer(
        
        
 #Get all custumer orders
-@router.get('{customer_id}/orders', response_model=list[schemas_dto.Customer_response])
+@router.get('{customer_id}/orders', response_model=List[schemas_dto.Customer_response])
 async def get_all_customers(
     customer_id: int,
     token: Annotated[str, Depends(oauth2_scheme)],
