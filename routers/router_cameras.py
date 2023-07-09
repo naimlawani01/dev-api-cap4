@@ -112,7 +112,12 @@ async def delete_camera(
 
 # Update
 @router.patch('/{camera_id}')
-async def update_camera(camera_id: int, payload:schemas_dto.Camera_PATCH_Body, cursor:Session=Depends(get_cursor)):
+async def update_camera(
+    camera_id: int,
+    token: Annotated[str, Depends(oauth2_scheme)],
+    payload:schemas_dto.Camera_PATCH_Body, 
+    cursor:Session=Depends(get_cursor)
+    ):
     # Recherce si la camera existe  
     corresponding_camera = cursor.query(Camera).filter_by(id = camera_id)
     if corresponding_camera.first():
