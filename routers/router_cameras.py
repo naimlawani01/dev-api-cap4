@@ -118,20 +118,29 @@ async def update_camera(
     payload:schemas_dto.Camera_PATCH_Body, 
     cursor:Session=Depends(get_cursor)
     ):
-    # Recherce si la camera existe  
-    corresponding_camera = cursor.query(Camera).filter_by(id = camera_id)
-    if corresponding_camera.first():
-        # mise à jour (quoi avec quelle valeur ?) Body -> DTO
-        corresponding_camera.update({
-            "price": payload.price,
-            "description": payload.description,
-            "availability": payload.availability,
-            "rating": payload.rating
-        })
-        cursor.commit() #Save modification
-        return corresponding_camera.first()
-    else: 
-        raise HTTPException (
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'No corresponding product with id: {camera_id}'
+    decoded_customer_id = utilities.decode_token(token)
+    user_auth = cursor.query(Customer).filter(Customer.id == decoded_customer_id).first()
+    if user_auth.role == "admin": 
+    
+        # Recherce si la camera existe  
+        corresponding_camera = cursor.query(Camera).filter_by(id = camera_id)
+        if corresponding_camera.first():
+            # mise à jour (quoi avec quelle valeur ?) Body -> DTO
+            corresponding_camera.update({
+                "price": payload.price,
+                "description": payload.description,
+                "availability": payload.availability,
+                "rating": payload.rating
+            })
+            cursor.commit() #Save modification
+            return corresponding_camera.first()
+        else: 
+            raise HTTPException (
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f'No corresponding product with id: {camera_id}'
+            )
+    else:
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            detail= "l'utilisateur n'est pas autorisé"
         )
