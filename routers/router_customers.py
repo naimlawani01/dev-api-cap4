@@ -6,6 +6,7 @@ from schemas import schemas_dto
 from models.Customer import Customer
 from models.Order import Order
 import utilities
+from typing import List
 
 from pydantic.typing import Annotated
 from fastapi.security import OAuth2PasswordBearer
@@ -37,7 +38,7 @@ async def create_customer(
             detail="User already exists" 
         )
 #Get all custumer
-@router.get('', response_model=list[schemas_dto.Customer_response])
+@router.get('', response_model=List[schemas_dto.Customer_response])
 async def get_all_customers(
     token: Annotated[str, Depends(oauth2_scheme)],
     cursor: Session = Depends(database.get_cursor)
