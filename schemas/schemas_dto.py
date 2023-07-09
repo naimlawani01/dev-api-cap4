@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 # DTO : Data Transfert Object
 
 
@@ -23,6 +23,7 @@ class Camera_PATCH_Body (BaseModel):
 class Customer_POST_Body (BaseModel):
     customerEmail:str
     customerPassword: str
+    role: str = "visiteur"
 
 class Customer_response (BaseModel):
     id: int
@@ -30,7 +31,9 @@ class Customer_response (BaseModel):
     create_at: datetime
     class Config: # Importante pour la traduction ORM->DTO
         orm_mode= True
-        
+
+class Customer_PATCH_Body(BaseModel):
+    role: str    
         
 class OrderBase(BaseModel):
     camera_id: int

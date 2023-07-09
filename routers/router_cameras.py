@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Response
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.database import get_cursor
 from schemas import schemas_dto
 from models.Camera import Camera
+from models.Customer import Customer
 import utilities
 
 from pydantic.typing import Annotated
@@ -17,48 +19,32 @@ router = APIRouter(
 
 #Get all cameras
 @router.get("")
-async def get_cameras(cursor: Session= Depends(get_cursor)):
-    all_cameras = cursor.query(Camera).all()
+async def get_cameras(
+    cursor: Session= Depends(get_cursor),
+    limit: int=10, 
+    offset: int=0
+    ):
+    all_cameras = cursor.query(Camera).limit(limit).offset(offset).all() # Get limit Camera 
+    camera_count= cursor.query(func.count(Camera.id)).scalar() #Count total camera in DB
     return {
         "products": all_cameras,
-        "limit": 10,
-        "total": 2,
-        "skip":0
+        "limit": limit,
+        "total": camera_count,
+        "skip": offset
     } 
 #Get cameras by Id
 @router.get("/{camera_id}")
 async def get_camera_by_id(camera_id: int, response: Response, cursor: Session= Depends(get_cursor)):
     # corresponding_camera = {}
     # id = get_corresponding_camera(camera_id)
-    try: 
 
-        corresponding_camera = cursor.query(Camera).filter_by(id = camera_id).first()
-        if corresponding_camera:
-            return corresponding_camera
-        else:
-            raise HTTPException(
-            status.HTTP_404_NOT_FOUND,
-            detail= "Camera not found"
-        )
-            
-    except:
+    corresponding_camera = cursor.query(Camera).filter_by(id = camera_id).first() # Filter Camera 
+    if not corresponding_camera: # Raise error if there is not camera
         raise HTTPException(
             status.HTTP_404_NOT_FOUND,
             detail= "Camera not found"
         )
-    # if corresponding_camera == {}:
-    #     response.status_code = status.HTTP_404_NOT_FOUND
-    #     return {"message": "Camera not found"}
-    # else:
-    #     return corresponding_camera
-    
-    # try:
-    #     corresponding_camera = cameras[index]
-    # except:
-    #     raise HTTPException(
-    #         status.HTTP_404_NOT_FOUND,
-    #         detail= "Camera not found"
-    #     )
+    return corresponding_camera
 
 
 #Post Camera
@@ -95,9 +81,12 @@ async def delete_camera(
     cursor:Session=Depends(get_cursor)
     ):
     
-        decoded_customer_id = utilities.decode_token(token)
-    # try: 
-        # Recherce si la camera existe  
+    decoded_customer_id = utilities.decode_token(token)
+    corresponding_customer = cursor.query(Customer).filter(Customer.id == decoded_customer_id).first()
+    # print(corresponding_customer)
+        
+    if corresponding_customer.role == "admin": 
+        # Recherce si la camera existe 
         corresponding_camera = cursor.query(Camera).filter_by(id = camera_id)
         if corresponding_camera.first():
             # Continue to delete
@@ -108,7 +97,12 @@ async def delete_camera(
             raise HTTPException(
             status.HTTP_404_NOT_FOUND,
             detail= "Camera not found with id: {id} ".format(id= camera_id)
-        )      
+        ) 
+    else:
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            detail= "l'utilisateur n'est pas autorisé"
+        )
     # except:
     #     raise HTTPException(
     #         status.HTTP_404_NOT_FOUND,
@@ -129,7 +123,7 @@ async def update_camera(camera_id: int, payload:schemas_dto.Camera_PATCH_Body, c
             "availability": payload.availability,
             "rating": payload.rating
         })
-        cursor.commit()
+        cursor.commit() #Save modification
         return corresponding_camera.first()
     else: 
         raise HTTPException (

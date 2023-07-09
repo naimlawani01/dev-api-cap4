@@ -13,7 +13,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth")
 
 router = APIRouter(
     prefix='/orders',
-    tags=['Oders']
+    tags=['Orders']
 )
 
 @router.post("", response_model=schemas_dto.Order)
