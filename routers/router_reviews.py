@@ -32,18 +32,24 @@ def create_review(
     token: Annotated[str, Depends(oauth2_scheme)],
     cursor: Session = Depends(get_cursor)
     ):
-    decoded_customer_id = utilities.decode_token(token) #GET AUTH ID 
-    new_review = Review(
-        customer_id = decoded_customer_id,
-        camera_id = review.camera_id,
-        review_text = review.review_text
-    ) #Bluid object
-    
-    # print(new_review)
-    cursor.add(new_review)
-    cursor.commit() # Save modificationn
-    cursor.refresh(new_review)
-    return new_review
+    try:
+        decoded_customer_id = utilities.decode_token(token) #GET AUTH ID 
+        new_review = Review(
+            customer_id = decoded_customer_id,
+            camera_id = review.camera_id,
+            review_text = review.review_text
+        ) #Bluid object
+        
+        # print(new_review)
+        cursor.add(new_review)
+        cursor.commit() # Save modificationn
+        cursor.refresh(new_review)
+        return new_review
+    except:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            detail= "Camera {id} dosn't exit can't post review".format(id=review.camera_id)
+        )
 
 #Get review by id
 @router.get("/{review_id}", response_model=schemas_dto.Review)
