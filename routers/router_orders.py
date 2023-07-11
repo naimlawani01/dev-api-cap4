@@ -22,19 +22,25 @@ def create_order(
     token: Annotated[str, Depends(oauth2_scheme)],
     cursor: Session = Depends(get_cursor)
     ):
-    decoded_customer_id = utilities.decode_token(token)
-    new_order = Order(
-        customer_id = decoded_customer_id,
-        camera_id= order.camera_id,
-        quantity= order.quantity,
-        total_amount= order.total_amount,
-        shipping_address= order.shipping_address,
-        status= order.status
-    )
-    cursor.add(new_order)
-    cursor.commit()
-    cursor.refresh(new_order)
-    return new_order
+    try:
+        decoded_customer_id = utilities.decode_token(token)
+        new_order = Order(
+            customer_id = decoded_customer_id,
+            camera_id= order.camera_id,
+            quantity= order.quantity,
+            total_amount= order.total_amount,
+            shipping_address= order.shipping_address,
+            status= order.status
+        )
+        cursor.add(new_order)
+        cursor.commit()
+        cursor.refresh(new_order)
+        return new_order
+    except:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            detail= "Camera {id} dosn't exit can't post review".format(id=order.camera_id)
+        )
 
 @router.get("/{order_id}", response_model=schemas_dto.Order)
 def get_order(order_id: int, cursor: Session = Depends(get_cursor)):
