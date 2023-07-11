@@ -39,7 +39,7 @@ def create_order(
     except:
         raise HTTPException(
             status.HTTP_404_NOT_FOUND,
-            detail= "Camera {id} dosn't exit can't post review".format(id=order.camera_id)
+            detail= "Camera {id} dosn't exit can't post order".format(id=order.camera_id)
         )
 
 @router.get("/{order_id}", response_model=schemas_dto.Order)
