@@ -9,7 +9,7 @@ Ce projet est une application Python développée dans le cadre du cours/formati
 3. Installez les dépendances nécessaires en exécutant la commande suivante :
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements.txt 
 
 ```
 
